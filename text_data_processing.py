@@ -34,18 +34,13 @@ def get_english_stopwords():
 
 def tokenize_words(text):
     """Tokenize text into words.
-    Tries NLTK's word_tokenize; if 'punkt' is missing, attempts to download; otherwise falls back to a simple regex split.
+    Tries NLTK's word_tokenize; if 'punkt' is missing, falls back to a simple regex split without attempting downloads.
     """
     try:
         return word_tokenize(text)
     except LookupError:
-        try:
-            import nltk
-            nltk.download('punkt', quiet=True)
-            return word_tokenize(text)
-        except Exception:
-            # Fallback: keep only alphabetic sequences as tokens
-            return re.findall(r"[A-Za-z]+", text)
+        # Fallback: keep only alphabetic sequences as tokens (no network access attempted)
+        return re.findall(r"[A-Za-z]+", text)
 
 def summarize_text_content(text, text_inference):
     """Summarize the given text content."""

@@ -127,7 +127,8 @@ def get_mode_selection():
         print("1. By Content")
         print("2. By Date")
         print("3. By Type")
-        response = input("Enter 1, 2, or 3 (or type '/exit' to exit): ").strip()
+        print("4. Test (simulate AI; organize by type only)")
+        response = input("Enter 1, 2, 3, or 4 (or type '/exit' to exit): ").strip()
         if response == '/exit':
             print("Exiting program.")
             exit()
@@ -137,8 +138,10 @@ def get_mode_selection():
             return 'date'
         elif response == '3':
             return 'type'
+        elif response == '4':
+            return 'test'
         else:
-            print("Invalid selection. Please enter 1, 2, or 3. To exit, type '/exit'.")
+            print("Invalid selection. Please enter 1, 2, 3, or 4. To exit, type '/exit'.")
 
 def main():
     # Ensure NLTK data is downloaded efficiently and quietly
@@ -185,8 +188,11 @@ def main():
         # Default output path is a folder named "organized_folder" in the same directory as the input path
         output_path = input("Enter the path to store organized files and folders (press Enter to use 'organized_folder' in the input directory): ").strip()
         if not output_path:
-            # Get the parent directory of the input path and append 'organized_folder'
-            output_path = os.path.join(os.path.dirname(input_path), 'organized_folder')
+            # Create 'organized_folder' inside the input directory (or alongside the input file)
+            if os.path.isdir(input_path):
+                output_path = os.path.join(input_path, 'organized_folder')
+            else:
+                output_path = os.path.join(os.path.dirname(input_path), 'organized_folder')
 
         # Confirm successful output path
         message = f"Output path successfully set to: {output_path}"
@@ -277,6 +283,18 @@ def main():
                 operations = process_files_by_date(file_paths, output_path, dry_run=False, silent=silent_mode, log_file=log_file)
             elif mode == 'type':
                 # Process files by type
+                operations = process_files_by_type(file_paths, output_path, dry_run=False, silent=silent_mode, log_file=log_file)
+            elif mode == 'test':
+                # Simulate AI activity but organize strictly by type without AI
+                if not silent_mode:
+                    print("Checking if the model is already downloaded. If not, downloading it now.")
+                    print("**----------------------------------------------**")
+                    print("**     Simulated vision model initialized      **")
+                    print("**     Simulated text model initialized        **")
+                    print("**----------------------------------------------**")
+                    print("*" * 50)
+                    print("The file upload was successful. Processing may take a few minutes.")
+                    print("*" * 50)
                 operations = process_files_by_type(file_paths, output_path, dry_run=False, silent=silent_mode, log_file=log_file)
             else:
                 print("Invalid mode selected.")

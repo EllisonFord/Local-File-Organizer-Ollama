@@ -162,7 +162,10 @@ def compute_operations(data_list, new_path, renamed_files, processed_files):
     return operations  # Return the list of operations for display or further processing
 
 def execute_operations(operations, dry_run=False, silent=False, log_file=None):
-    """Execute the file operations."""
+    """Execute the file operations.
+    Attempts hardlink/symlink first; on failure, falls back to copying the file (copy2).
+    """
+    import shutil
     total_operations = len(operations)
 
     with Progress(
@@ -187,11 +190,21 @@ def execute_operations(operations, dry_run=False, silent=False, log_file=None):
                 try:
                     if link_type == 'hardlink':
                         os.link(source, destination)
-                    else:
+                        message = f"Created {link_type} from '{source}' to '{destination}'"
+                    elif link_type == 'symlink':
                         os.symlink(source, destination)
-                    message = f"Created {link_type} from '{source}' to '{destination}'"
+                        message = f"Created {link_type} from '{source}' to '{destination}'"
+                    else:
+                        # Unknown link_type -> copy
+                        shutil.copy2(source, destination)
+                        message = f"Copied file from '{source}' to '{destination}'"
                 except Exception as e:
-                    message = f"Error creating {link_type} from '{source}' to '{destination}': {e}"
+                    # Fallback to copying the file if linking fails
+                    try:
+                        shutil.copy2(source, destination)
+                        message = f"Link failed ({e}); copied file from '{source}' to '{destination}' instead"
+                    except Exception as copy_err:
+                        message = f"Error saving file to '{destination}': {copy_err} (original link error: {e})"
 
             progress.advance(task)
 

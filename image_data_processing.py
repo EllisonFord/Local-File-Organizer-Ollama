@@ -10,35 +10,25 @@ from data_processing_common import sanitize_filename  # Import sanitize_filename
 # Robust fallbacks for NLTK resources (works offline if corpora are missing)
 def get_english_stopwords():
     """Return a set of English stopwords.
-    Tries NLTK's stopwords; if unavailable, attempts a quiet download; if that fails, uses a built-in minimal set.
+    Tries NLTK's stopwords; if unavailable, uses a built-in minimal set without attempting any downloads.
     """
     try:
         return set(stopwords.words('english'))
     except LookupError:
-        try:
-            import nltk
-            nltk.download('stopwords', quiet=True)
-            return set(stopwords.words('english'))
-        except Exception:
-            # Minimal built-in fallback set
-            return set([
-                'a','an','and','are','as','at','be','but','by','for','if','in','into','is','it','no','not','of','on','or','such','that','the','their','then','there','these','they','this','to','was','will','with','you','your','i','we','he','she','from','have','has','had','were','was','do','does','did'
-            ])
+        # Minimal built-in fallback set (no network access attempted)
+        return set([
+            'a','an','and','are','as','at','be','but','by','for','if','in','into','is','it','no','not','of','on','or','such','that','the','their','then','there','these','they','this','to','was','will','with','you','your','i','we','he','she','from','have','has','had','were','was','do','does','did'
+        ])
 
 def tokenize_words(text):
     """Tokenize text into words.
-    Tries NLTK's word_tokenize; if 'punkt' is missing, attempts to download; otherwise falls back to a simple regex split.
+    Tries NLTK's word_tokenize; if 'punkt' is missing, falls back to a simple regex split without attempting downloads.
     """
     try:
         return word_tokenize(text)
     except LookupError:
-        try:
-            import nltk
-            nltk.download('punkt', quiet=True)
-            return word_tokenize(text)
-        except Exception:
-            # Fallback: keep only alphabetic sequences as tokens
-            return re.findall(r"[A-Za-z]+", text)
+        # Fallback: keep only alphabetic sequences as tokens (no network access attempted)
+        return re.findall(r"[A-Za-z]+", text)
 
 def get_text_from_generator(generator):
     """Extract text from the generator response."""
