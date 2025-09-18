@@ -24,14 +24,41 @@ from image_data_processing import (
 )
 
 from output_filter import filter_specific_output  # Import the context manager
-from nexa.gguf import NexaVLMInference, NexaTextInference  # Import model classes
+from ollama_client import OllamaVLMInference, OllamaTextInference  # Use Ollama wrappers
 
 def ensure_nltk_data():
-    """Ensure that NLTK data is downloaded efficiently and quietly."""
+    """Ensure NLTK resources are available without forcing network downloads.
+    Checks for required corpora/tokenizers and skips downloads by default to avoid SSL errors.
+    If you explicitly want auto-downloads, set env var NLTK_AUTO_DOWNLOAD=1.
+    """
+    import os as _os
     import nltk
-    nltk.download('stopwords', quiet=True)
-    nltk.download('punkt', quiet=True)
-    nltk.download('wordnet', quiet=True)
+    from nltk.data import find
+
+    resources = {
+        'tokenizers/punkt': 'punkt',
+        'corpora/stopwords': 'stopwords',
+        'corpora/wordnet': 'wordnet',
+    }
+
+    missing = []
+    for path, pkg in resources.items():
+        try:
+            find(path)
+        except LookupError:
+            missing.append(pkg)
+
+    # By default, do not attempt network downloads; rely on offline fallbacks.
+    if not missing:
+        return
+
+    if _os.environ.get('NLTK_AUTO_DOWNLOAD', '').lower() in ('1', 'true', 'yes'):  # optional
+        for pkg in missing:
+            try:
+                nltk.download(pkg, quiet=True)
+            except Exception:
+                # Ignore any downloader errors; downstream code has fallbacks.
+                pass
 
 # Initialize models
 image_inference = None
@@ -41,41 +68,20 @@ def initialize_models():
     """Initialize the models if they haven't been initialized yet."""
     global image_inference, text_inference
     if image_inference is None or text_inference is None:
-        # Initialize the models
-        model_path = "llava-v1.6-vicuna-7b:q4_0"
-        model_path_text = "Llama3.2-3B-Instruct:q3_K_M"
+        # Initialize the models (using Ollama models)
+        image_model = "llava:7b"
+        text_model = "llama3.2:3b"
 
         # Use the filter_specific_output context manager
         with filter_specific_output():
-            # Initialize the image inference model
-            image_inference = NexaVLMInference(
-                model_path=model_path,
-                local_path=None,
-                stop_words=[],
-                temperature=0.3,
-                max_new_tokens=3000,
-                top_k=3,
-                top_p=0.2,
-                profiling=False
-                # add n_ctx if out of context window usage: n_ctx=2048
-            )
+            # Initialize the image inference model (wrapper over Ollama vision model)
+            image_inference = OllamaVLMInference(model=image_model)
 
-            # Initialize the text inference model
-            text_inference = NexaTextInference(
-                model_path=model_path_text,
-                local_path=None,
-                stop_words=[],
-                temperature=0.5,
-                max_new_tokens=3000,  # Adjust as needed
-                top_k=3,
-                top_p=0.3,
-                profiling=False
-                # add n_ctx if out of context window usage: n_ctx=2048
-
-            )
+            # Initialize the text inference model (wrapper over Ollama text model)
+            text_inference = OllamaTextInference(model=text_model)
         print("**----------------------------------------------**")
-        print("**       Image inference model initialized      **")
-        print("**       Text inference model initialized       **")
+        print("**       Ollama vision model initialized        **")
+        print("**       Ollama text model initialized          **")
         print("**----------------------------------------------**")
 
 def simulate_directory_tree(operations, base_path):

@@ -89,7 +89,7 @@ This intelligent file organizer harnesses the power of advanced AI models, inclu
 * Understanding the content of your files (text, images, and more) to generate relevant descriptions, folder names, and filenames.
 * Organizing the files into a new directory structure based on the generated metadata.
 
-The best part? All AI processing happens 100% on your local device using the [Nexa SDK](https://github.com/NexaAI/nexa-sdk). No internet connection required, no data leaves your computer, and no AI API is needed - keeping your files completely private and secure.
+The best part? All AI processing happens 100% on your local device using [Ollama](https://ollama.com/) running locally. No internet connection required, no data leaves your computer, and no external AI API keys are needed — keeping your files completely private and secure.
 
 
 ## Supported File Types 📁
@@ -143,20 +143,23 @@ Activate the environment:
 conda activate local_file_organizer
 ```
 
-### 4. Install Nexa SDK ️
+### 4. Install and Run Ollama ️
 
-#### CPU Installation
-To install the CPU version of Nexa SDK, run:
-```bash
-pip install nexaai --prefer-binary --index-url https://nexaai.github.io/nexa-sdk/whl/cpu --extra-index-url https://pypi.org/simple --no-cache-dir
-```
+This project now uses Ollama to run models locally via HTTP.
 
-#### GPU Installation (Metal - macOS)
-For the GPU version supporting Metal (macOS), run:
-```bash
-CMAKE_ARGS="-DGGML_METAL=ON -DSD_METAL=ON" pip install nexaai --prefer-binary --index-url https://nexaai.github.io/nexa-sdk/whl/metal --extra-index-url https://pypi.org/simple --no-cache-dir
-```
-For detailed installation instructions of Nexa SDK for **CUDA** and **AMD GPU** support, please refer to the [Installation section](https://github.com/NexaAI/nexa-sdk?tab=readme-ov-file#installation) in the main README.
+- Install Ollama: https://ollama.com/download
+  - macOS: `brew install --cask ollama`
+  - Linux: `curl -fsSL https://ollama.com/install.sh | sh`
+  - Windows: Download and install from the website.
+- Start the Ollama service (if it doesn't start automatically):
+  ```bash
+  ollama serve
+  ```
+- Pull the required models:
+  ```bash
+  ollama pull llama3.2:3b
+  ollama pull llava:7b
+  ```
 
 
 ### 5. Install Dependencies 
@@ -175,7 +178,7 @@ For detailed installation instructions of Nexa SDK for **CUDA** and **AMD GPU** 
 **Note:** If you encounter issues with any packages, install them individually:
 
 ```zsh
-pip install nexa Pillow pytesseract PyMuPDF python-docx
+pip install Pillow pytesseract PyMuPDF python-docx
 ```
 
 With the environment activated and dependencies installed, run the script using:
@@ -187,10 +190,10 @@ python main.py
 
 ## Notes
 
-- **SDK Models:**
-  - The script uses `NexaVLMInference` and `NexaTextInference` models [usage](https://docs.nexaai.com/sdk/python-interface/gguf).
-  - Ensure you have access to these models and they are correctly set up.
-  - You may need to download model files or configure paths.
+- **Ollama Models:**
+  - The script uses `llava:13b` (vision) and `llama3:8b` (text) via the local Ollama service at http://localhost:11434.
+  - Ensure Ollama is running and these models are pulled (`ollama pull llava:13b` and `ollama pull llama3:8b`).
+  - No external API keys are required; everything runs locally.
 
 
 - **Dependencies:**

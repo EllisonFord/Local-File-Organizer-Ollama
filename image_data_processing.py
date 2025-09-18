@@ -7,6 +7,39 @@ from nltk.stem import WordNetLemmatizer
 from rich.progress import Progress, TextColumn, BarColumn, TimeElapsedColumn
 from data_processing_common import sanitize_filename  # Import sanitize_filename
 
+# Robust fallbacks for NLTK resources (works offline if corpora are missing)
+def get_english_stopwords():
+    """Return a set of English stopwords.
+    Tries NLTK's stopwords; if unavailable, attempts a quiet download; if that fails, uses a built-in minimal set.
+    """
+    try:
+        return set(stopwords.words('english'))
+    except LookupError:
+        try:
+            import nltk
+            nltk.download('stopwords', quiet=True)
+            return set(stopwords.words('english'))
+        except Exception:
+            # Minimal built-in fallback set
+            return set([
+                'a','an','and','are','as','at','be','but','by','for','if','in','into','is','it','no','not','of','on','or','such','that','the','their','then','there','these','they','this','to','was','will','with','you','your','i','we','he','she','from','have','has','had','were','was','do','does','did'
+            ])
+
+def tokenize_words(text):
+    """Tokenize text into words.
+    Tries NLTK's word_tokenize; if 'punkt' is missing, attempts to download; otherwise falls back to a simple regex split.
+    """
+    try:
+        return word_tokenize(text)
+    except LookupError:
+        try:
+            import nltk
+            nltk.download('punkt', quiet=True)
+            return word_tokenize(text)
+        except Exception:
+            # Fallback: keep only alphabetic sequences as tokens
+            return re.findall(r"[A-Za-z]+", text)
+
 def get_text_from_generator(generator):
     """Extract text from the generator response."""
     response_text = ""
@@ -131,7 +164,7 @@ Category:"""
         'details', 'description', 'depicts', 'show', 'shows', 'display', 'illustrates', 'presents', 'features',
         'provides', 'covers', 'includes', 'demonstrates', 'describes'
     ])
-    stop_words = set(stopwords.words('english'))
+    stop_words = get_english_stopwords()
     all_unwanted_words = unwanted_words.union(stop_words)
     lemmatizer = WordNetLemmatizer()
 
@@ -145,9 +178,13 @@ Category:"""
         # Split concatenated words (e.g., 'GoogleChrome' -> 'Google Chrome')
         text = re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
         # Tokenize and lemmatize words
-        words = word_tokenize(text)
+        words = tokenize_words(text)
         words = [word.lower() for word in words if word.isalpha()]
-        words = [lemmatizer.lemmatize(word) for word in words]
+        try:
+            words = [lemmatizer.lemmatize(word) for word in words]
+        except LookupError:
+            # If WordNet data is missing and cannot be downloaded, skip lemmatization
+            pass
         # Remove unwanted words and duplicates
         filtered_words = []
         seen = set()
