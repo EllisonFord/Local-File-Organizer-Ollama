@@ -5,7 +5,7 @@ from typing import Generator, Dict, Any, Optional
 OLLAMA_BASE_URL = "http://localhost:11434"
 
 
-def generate_text(prompt: str, model: str = "llama3:8b", base_url: Optional[str] = None) -> str:
+def generate_text(prompt: str, model: str = "llama3.2:3b", base_url: Optional[str] = None) -> str:
     """Call Ollama /api/generate for text-only prompts and return the full response text."""
     url = (base_url or OLLAMA_BASE_URL).rstrip("/") + "/api/generate"
     resp = requests.post(url, json={
@@ -19,7 +19,7 @@ def generate_text(prompt: str, model: str = "llama3:8b", base_url: Optional[str]
     return data.get("response", "")
 
 
-def analyze_image(image_path: str, prompt: str, model: str = "llava:13b", base_url: Optional[str] = None) -> str:
+def analyze_image(image_path: str, prompt: str, model: str = "llava:7b", base_url: Optional[str] = None) -> str:
     """Call Ollama /api/generate for a vision model using a local image and return the full response text."""
     with open(image_path, "rb") as f:
         image_data = f.read()
@@ -40,7 +40,7 @@ def analyze_image(image_path: str, prompt: str, model: str = "llava:13b", base_u
 class OllamaTextInference:
     """A tiny adapter to keep the existing interface (.create_completion) intact."""
 
-    def __init__(self, model: str = "llama3:8b", base_url: Optional[str] = None):
+    def __init__(self, model: str = "llama3.2:3b", base_url: Optional[str] = None):
         self.model = model
         self.base_url = base_url or OLLAMA_BASE_URL
 
@@ -57,7 +57,7 @@ class OllamaVLMInference:
     We provide a simple single-yield generator with the full content.
     """
 
-    def __init__(self, model: str = "llava:13b", base_url: Optional[str] = None):
+    def __init__(self, model: str = "llava:7b", base_url: Optional[str] = None):
         self.model = model
         self.base_url = base_url or OLLAMA_BASE_URL
 

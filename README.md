@@ -191,8 +191,8 @@ python main.py
 ## Notes
 
 - **Ollama Models:**
-  - The script uses `llava:13b` (vision) and `llama3:8b` (text) via the local Ollama service at http://localhost:11434.
-  - Ensure Ollama is running and these models are pulled (`ollama pull llava:13b` and `ollama pull llama3:8b`).
+  - The script uses `llava:7b` (vision) and `llama3.2:3b` (text) via the local Ollama service at http://localhost:11434.
+  - Ensure Ollama is running and these models are pulled (`ollama pull llava:7b` and `ollama pull llama3.2:3b`).
   - No external API keys are required; everything runs locally.
 
 
