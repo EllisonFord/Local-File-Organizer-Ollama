@@ -32,7 +32,7 @@ def sanitize_filename(name, max_length=50, max_words=5):
     # Limit length
     return limited_name[:max_length] if limited_name else 'untitled'
 
-def process_files_by_date(file_paths, output_path, dry_run=False, silent=False, log_file=None):
+def process_files_by_date(file_paths, output_path, dry_run=False, silent=False, log_file=None, link_type: str = 'hardlink'):
     """Process files to organize them by date."""
     operations = []
     for file_path in file_paths:
@@ -47,8 +47,7 @@ def process_files_by_date(file_paths, output_path, dry_run=False, silent=False, 
         # Prepare new file path
         new_file_name = os.path.basename(file_path)
         new_file_path = os.path.join(dir_path, new_file_name)
-        # Decide whether to use hardlink or symlink
-        link_type = 'hardlink'  # Assume hardlink for now
+        # Use the link_type provided by caller (hardlink/symlink/copy)
         # Record the operation
         operation = {
             'source': file_path,
@@ -58,7 +57,7 @@ def process_files_by_date(file_paths, output_path, dry_run=False, silent=False, 
         operations.append(operation)
     return operations
 
-def process_files_by_type(file_paths, output_path, dry_run=False, silent=False, log_file=None):
+def process_files_by_type(file_paths, output_path, dry_run=False, silent=False, log_file=None, link_type: str = 'hardlink'):
     """Process files to organize them by type, first separating into text-based and image-based files."""
     operations = []
 
@@ -108,8 +107,7 @@ def process_files_by_type(file_paths, output_path, dry_run=False, silent=False, 
         # Prepare new file path
         new_file_name = os.path.basename(file_path)
         new_file_path = os.path.join(dir_path, new_file_name)
-        # Decide whether to use hardlink or symlink
-        link_type = 'hardlink'  # Assume hardlink for now
+        # Use the link_type provided by caller (hardlink/symlink/copy)
         # Record the operation
         operation = {
             'source': file_path,
@@ -120,7 +118,7 @@ def process_files_by_type(file_paths, output_path, dry_run=False, silent=False, 
 
     return operations
 
-def compute_operations(data_list, new_path, renamed_files, processed_files):
+def compute_operations(data_list, new_path, renamed_files, processed_files, link_type: str = 'hardlink'):
     """Compute the file operations based on generated metadata."""
     operations = []
     for data in data_list:
@@ -145,8 +143,7 @@ def compute_operations(data_list, new_path, renamed_files, processed_files):
             new_file_path = os.path.join(dir_path, new_file_name)
             counter += 1
 
-        # Decide whether to use hardlink or symlink
-        link_type = 'hardlink'  # Assume hardlink for now
+        # Use the link_type provided by caller (hardlink/symlink/copy)
 
         # Record the operation
         operation = {
