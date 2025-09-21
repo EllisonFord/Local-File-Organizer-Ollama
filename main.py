@@ -252,7 +252,7 @@ def main():
             'input_path': cfg.get('input_path', ''),
             'output_path': cfg.get('output_path', ''),
             'silent': cfg.get('silent', True),
-            'dry_run': cfg.get('dry_run', True),
+            'dry_run': cfg.get('dry_run', False),
             'link': cfg.get('link', 'hard'),
             'mode': cfg.get('mode')
         }
@@ -269,7 +269,7 @@ def main():
 
     # Resolve settings with precedence: CLI > config > defaults
     silent_mode = bool(args.silent or cfg.get('silent', False))
-    dry_run = bool(args.dry_run or cfg.get('dry_run', True))
+    dry_run = bool(args.dry_run or cfg.get('dry_run', False))
 
     # Link strategy
     link_choice = (args.link or cfg.get('link', 'hard')).lower()

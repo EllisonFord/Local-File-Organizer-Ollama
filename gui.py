@@ -57,7 +57,7 @@ def prompt_user_for_config(defaults: Optional[Dict[str, Any]] = None) -> Optiona
     src_var = tk.StringVar(value=str(defaults.get("input_path", "")))
     dst_var = tk.StringVar(value=str(defaults.get("output_path", "")))
     silent_var = tk.BooleanVar(value=bool(defaults.get("silent", True)))
-    dryrun_var = tk.BooleanVar(value=bool(defaults.get("dry_run", True)))
+    dryrun_var = tk.BooleanVar(value=bool(defaults.get("dry_run", False)))
     link_var = tk.StringVar(value=str(defaults.get("link", "hard")))
     mode_var = tk.StringVar(value=str(defaults.get("mode") or ""))
 
