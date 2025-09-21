@@ -251,7 +251,7 @@ def main():
         gui_defaults = {
             'input_path': cfg.get('input_path', ''),
             'output_path': cfg.get('output_path', ''),
-            'silent': cfg.get('silent', False),
+            'silent': cfg.get('silent', True),
             'dry_run': cfg.get('dry_run', True),
             'link': cfg.get('link', 'hard'),
             'mode': cfg.get('mode')
