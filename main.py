@@ -28,6 +28,14 @@ from image_data_processing import (
 
 from output_filter import filter_specific_output  # Import the context manager
 from ollama_client import OllamaVLMInference, OllamaTextInference  # Use Ollama wrappers
+# Optional GUI helpers (Tkinter)
+try:
+    from gui import is_gui_available, prompt_user_for_config
+except Exception:
+    def is_gui_available() -> bool:  # fallback
+        return False
+    def prompt_user_for_config(defaults=None):  # type: ignore
+        return None
 
 def ensure_nltk_data():
     """Ensure NLTK resources are available without forcing network downloads.
@@ -231,6 +239,33 @@ def main():
 
     # Parse CLI and config
     args, cfg = parse_cli_and_config()
+
+    # If GUI is available and no critical CLI inputs provided, open GUI to collect them
+    try:
+        no_cli_inputs = not any([
+            args.input_path, args.output_path, args.mode, args.silent, args.dry_run, args.link
+        ])
+    except Exception:
+        no_cli_inputs = False
+    if no_cli_inputs and is_gui_available():
+        gui_defaults = {
+            'input_path': cfg.get('input_path', ''),
+            'output_path': cfg.get('output_path', ''),
+            'silent': cfg.get('silent', False),
+            'dry_run': cfg.get('dry_run', True),
+            'link': cfg.get('link', 'hard'),
+            'mode': cfg.get('mode')
+        }
+        selection = prompt_user_for_config(gui_defaults)
+        if selection:
+            # Populate argparse Namespace with GUI selections
+            args.input_path = selection.get('input_path') or args.input_path
+            args.output_path = selection.get('output_path') or args.output_path
+            args.silent = bool(selection.get('silent'))
+            args.dry_run = bool(selection.get('dry_run'))
+            args.link = selection.get('link') or args.link
+            if selection.get('mode'):
+                args.mode = selection.get('mode')
 
     # Resolve settings with precedence: CLI > config > defaults
     silent_mode = bool(args.silent or cfg.get('silent', False))
