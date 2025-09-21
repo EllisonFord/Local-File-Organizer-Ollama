@@ -1,4 +1,4 @@
-# Local File Organizer: AI File Management Run Entirely on Your Device, Privacy Assured
+# Local File Organizer Ollama: AI File Management Run Entirely on Your Device, Privacy Assured
 
 Tired of digital clutter? Overwhelmed by disorganized files scattered across your computer? Let AI do the heavy lifting! The Local File Organizer is your personal organizing assistant, using cutting-edge AI to bring order to your file chaos - all while respecting your privacy.
 
@@ -49,19 +49,33 @@ After:
 7 directories, 11 files
 ```
 
+## About this fork
+
+This repository is a community-maintained fork of the original Local File Organizer project by QiuYannnn. The original project used the Nexa SDK. This fork replaces Nexa with Ollama to run everything locally without API keys.
+
+Key differences from the original:
+- Nexa SDK removed; added a light HTTP client (ollama_client.py) to talk to Ollama.
+- Default models are now llama3.2:3b (text) and llava:7b (vision) from the Ollama library.
+- No external accounts or keys required; models run via http://localhost:11434.
+- Windows-specific guidance added (PATH, service, PowerShell commands).
+
+Credits: Huge thanks to the original author and to the Nexa community for inspiring the initial implementation.
+
 ## Updates 🚀
 
-**[2024/09] v0.0.2**:
-* Featured by [Nexa Gallery](https://nexaai.com/gallery) and [Nexa SDK Cookbook](https://github.com/NexaAI/nexa-sdk/tree/main/examples)!
-* Dry Run Mode: check sorting results before committing changes
-* Silent Mode: save all logs to a txt file for quieter operation
-* Added file support:  `.md`, .`excel`, `.ppt`, and `.csv` 
-* Three sorting options: by content, by date, and by type
-* The default text model is now [Llama3.2 3B](https://nexaai.com/meta/Llama3.2-3B-Instruct/gguf-q3_K_M/file)
-* Improved CLI interaction experience
-* Added real-time progress bar for file analysis
-
-Please update the project by deleting the original project folder and reinstalling the requirements. Refer to the installation guide from Step 4.
+- [2025/09] v0.1.0 (Ollama fork)
+  - Migrated from Nexa SDK to Ollama
+  - Added detailed Windows setup notes (PATH, service)
+  - Updated documentation and commands
+  - Kept model defaults: llama3.2:3b (text) and llava:7b (vision)
+- [2024/09] v0.0.2 (original project)
+  - Featured by Nexa Gallery and Nexa SDK Cookbook
+  - Dry Run Mode: check sorting results before committing changes
+  - Silent Mode: save all logs to a txt file for quieter operation
+  - Added file support:  `.md`, .`excel`, `.ppt`, and `.csv` 
+  - Three sorting options: by content, by date, and by type
+  - Improved CLI interaction experience
+  - Added real-time progress bar for file analysis
 
 
 ## Roadmap 📅
@@ -74,7 +88,7 @@ Please update the project by deleting the original project folder and reinstalli
 - [ ] Implement best practices like Johnny Decimal
 - [ ] Check file duplication
 - [ ] Dockerfile for easier installation
-- [ ] People from [Nexa](https://github.com/NexaAI/nexa-sdk) is helping me to make executables for macOS, Linux and Windows
+- [ ] Create packaged executables for macOS, Linux, and Windows (community help welcome)
 
 ## What It Does 🔍
 
@@ -83,8 +97,8 @@ This intelligent file organizer harnesses the power of advanced AI models, inclu
 
 * Scanning a specified input directory for files.
 * Content Understanding: 
-  - **Textual Analysis**: Uses the [Llama3.2 3B](https://nexaai.com/meta/Llama3.2-3B-Instruct/gguf-q3_K_M/file) to analyze and summarize text-based content, generating relevant descriptions and filenames.
-  - **Visual Content Analysis**: Uses the [LLaVA-v1.6](https://nexaai.com/liuhaotian/llava-v1.6-vicuna-7b/gguf-q4_0/file) , based on Vicuna-7B, to interpret visual files such as images, providing context-aware categorization and descriptions.
+  - Textual analysis via the Ollama model llama3.2:3b (https://ollama.com/library/llama3.2) to summarize text and propose filenames.
+  - Visual content analysis via the Ollama model llava:7b (https://ollama.com/library/llava) to interpret images for categorization and descriptions.
 
 * Understanding the content of your files (text, images, and more) to generate relevant descriptions, folder names, and filenames.
 * Organizing the files into a new directory structure based on the generated metadata.
@@ -109,7 +123,7 @@ The best part? All AI processing happens 100% on your local device using [Ollama
 
 ## Installation 🛠
 
-> For SDK installation and model-related issues, please post on [here](https://github.com/NexaAI/nexa-sdk/issues).
+> This fork migrates the project from Nexa SDK to Ollama. For Ollama installation and troubleshooting, see https://ollama.com/download and https://github.com/ollama/ollama.
 
 ### 1. Install Python
 
@@ -121,10 +135,16 @@ Follow the installation instructions for your operating system.
 
 ### 2. Clone the Repository
 
-Clone this repository to your local machine using Git:
+Clone this fork (Ollama version) to your local machine using Git:
 
-```zsh
-git clone https://github.com/QiuYannnn/Local-File-Organizer.git
+```bash
+git clone https://github.com/EllisonFord/Local-File-Organizer-Ollama.git
+```
+
+On Windows PowerShell:
+
+```powershell
+git clone https://github.com/EllisonFord/Local-File-Organizer-Ollama.git
 ```
 
 Or download the repository as a ZIP file and extract it to your desired location.
@@ -145,13 +165,21 @@ conda activate local_file_organizer
 
 ### 4. Install and Run Ollama ️
 
-This project now uses Ollama to run models locally via HTTP.
+This fork replaces the original Nexa integration with a local Ollama setup. All AI runs on http://localhost:11434.
 
 - Install Ollama: https://ollama.com/download
-  - macOS: `brew install --cask ollama`
-  - Linux: `curl -fsSL https://ollama.com/install.sh | sh`
-  - Windows: Download and install from the website.
-- Start the Ollama service (if it doesn't start automatically):
+  - macOS: brew install --cask ollama
+  - Linux: curl -fsSL https://ollama.com/install.sh | sh
+  - Windows:
+    - Download and run the installer from the website.
+    - After install, open a new PowerShell and verify:
+      ```powershell
+      ollama --version
+      ```
+    - If you see 'ollama is not recognized', add this folder to your PATH and restart your shell:
+      - C:\\Program Files\\Ollama
+    - The Ollama service usually starts automatically on Windows. You can also start it from the Start Menu (Ollama) or Services.
+- Start the Ollama service (macOS/Linux or if you prefer running it manually):
   ```bash
   ollama serve
   ```
@@ -160,15 +188,33 @@ This project now uses Ollama to run models locally via HTTP.
   ollama pull llama3.2:3b
   ollama pull llava:7b
   ```
+  - Model pages: https://ollama.com/library/llama3.2 and https://ollama.com/library/llava
+  - Optional: set a custom host/port via environment variable:
+    - macOS/Linux:
+      ```bash
+      export OLLAMA_HOST=0.0.0.0:11434
+      ```
+    - Windows PowerShell:
+      ```powershell
+      $env:OLLAMA_HOST = "0.0.0.0:11434"
+      ```
+- GPU notes:
+  - NVIDIA GPUs are supported on Windows; otherwise, Ollama will fall back to CPU.
+  - Larger models require more VRAM; the defaults in this repo use 3B/7B variants to fit most machines.
 
 
 ### 5. Install Dependencies 
 
 1. Ensure you are in the project directory:
-   ```zsh
-   cd path/to/Local-File-Organizer
-   ```
-   Replace `path/to/Local-File-Organizer` with the actual path where you cloned or extracted the project.
+   - macOS/Linux:
+     ```bash
+     cd path/to/Local-File-Organizer-Ollama
+     ```
+   - Windows PowerShell:
+     ```powershell
+     cd C:\path\to\Local-File-Organizer-Ollama
+     ```
+   Replace the path with the actual location where you cloned or extracted the project.
 
 2. Install the required dependencies:
    ```zsh
