@@ -381,6 +381,27 @@ def main():
                 print("Invalid mode selected.")
                 return
 
+            # Add operations to copy any unprocessed, non-hidden files into an 'unclassified' folder
+            try:
+                all_non_hidden = [fp for fp in file_paths if not os.path.basename(fp).startswith('.')]
+                processed_sources = {op['source'] for op in operations}
+                unprocessed_files = [fp for fp in all_non_hidden if fp not in processed_sources]
+                if unprocessed_files:
+                    unclassified_dir = os.path.join(output_path, 'unclassified')
+                    for fp in unprocessed_files:
+                        dest = os.path.join(unclassified_dir, os.path.basename(fp))
+                        operations.append({
+                            'source': fp,
+                            'destination': dest,
+                            'link_type': 'copy',  # always copy as-is per requirement
+                            'unclassified': True
+                        })
+                        warn_msg = f"WARNING: File '{fp}' will be copied as-is to '{unclassified_dir}' without classification or renaming."
+                        print_and_log(warn_msg, silent_mode, log_file)
+            except Exception as _e:
+                # Do not fail the run due to unclassified handling
+                print_and_log(f"Note: Skipped adding unclassified operations due to: {_e}", silent_mode, log_file)
+
             # Simulate and display the proposed directory tree
             print_and_log("-" * 50, silent_mode, log_file)
             print_and_log("Proposed directory structure:", silent_mode, log_file)

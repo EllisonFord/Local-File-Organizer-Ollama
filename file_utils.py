@@ -108,7 +108,8 @@ def display_directory_tree(path):
 def collect_file_paths(base_path):
     """Collect all file paths from the base directory or single file, excluding hidden files."""
     if os.path.isfile(base_path):
-        return [base_path]
+        # Exclude hidden files (dotfiles)
+        return [] if os.path.basename(base_path).startswith('.') else [base_path]
     else:
         file_paths = []
         for root, _, files in os.walk(base_path):

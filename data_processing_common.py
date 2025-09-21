@@ -297,6 +297,10 @@ def execute_operations(operations, dry_run=False, silent=False, log_file=None):
                     except Exception as copy_err:
                         message = f"Error saving file to '{destination}': {copy_err} (original link error: {e})"
 
+            # Add warning for unclassified operations
+            if operation.get('unclassified'):
+                warn_line = f"WARNING: File copied without classification or renaming: '{source}' -> '{destination}'"
+                message = warn_line + "\n" + message
             progress.advance(task)
 
             # Silent mode handling
